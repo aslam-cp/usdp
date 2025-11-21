@@ -1,0 +1,335 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>USDP – API Integration Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css">
+    <style>
+        body {
+            background-color: #f5f7fb;
+        }
+        .dashboard-header {
+            padding: 1.5rem 0;
+        }
+        .kpi-card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 0.25rem 0.75rem rgba(15, 23, 42, 0.08);
+        }
+        .kpi-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: #6b7280;
+        }
+        .kpi-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+        .kpi-sub {
+            font-size: 0.8rem;
+            color: #6b7280;
+        }
+        .section-title {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        .table-card {
+            border-radius: 1rem;
+            box-shadow: 0 0.25rem 0.75rem rgba(15, 23, 42, 0.06);
+        }
+        .badge-pill {
+            border-radius: 999px;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <header class="dashboard-header border-bottom mb-3">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div>
+                <h1 class="h3 mb-1">USDP – API Integration Dashboard</h1>
+                <p class="text-muted mb-0">Overview of department-wise onboarding progress based only on the “Services already Identified” sheet.</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- KPI Row -->
+    <section class="mb-4">
+        <div class="row g-3">
+            <div class="col-6 col-md-3">
+                <div class="card kpi-card h-100">
+                    <div class="card-body">
+                        <div class="kpi-label">Departments</div>
+                        <div class="kpi-value">25</div>
+                        <div class="kpi-sub">Participating departments</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card kpi-card h-100">
+                    <div class="card-body">
+                        <div class="kpi-label">Applications</div>
+                        <div class="kpi-value">25</div>
+                        <div class="kpi-sub">Integrated applications</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card kpi-card h-100">
+                    <div class="card-body">
+                        <div class="kpi-label">Services</div>
+                        <div class="kpi-value">171</div>
+                        <div class="kpi-sub">Total services identified</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="card kpi-card h-100">
+                    <div class="card-body">
+                        <div class="kpi-label">Average Progress</div>
+                        <div class="kpi-value">0.2%</div>
+                        <div class="kpi-sub">Across all departments</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mt-1">
+            <div class="col-md-4">
+                <div class="card kpi-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <div class="kpi-label">APIs Received</div>
+                            <span class="badge bg-light text-dark badge-pill">From departments</span>
+                        </div>
+                        <div class="kpi-value">6</div>
+                        <div class="kpi-sub">APIs shared to DUK</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card kpi-card h-100">
+                    <div class="card-body">
+                        <div class="kpi-label">APIs Tested OK</div>
+                        <div class="kpi-value">2</div>
+                        <div class="kpi-sub">Functional and verified</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card kpi-card h-100">
+                    <div class="card-body">
+                        <div class="kpi-label">Remaining APIs</div>
+                        <div class="kpi-value">169</div>
+                        <div class="kpi-sub">Pending from departments</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Charts Row -->
+    <section class="mb-4">
+        <div class="row g-3">
+            <div class="col-lg-8">
+                <div class="card table-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="section-title">Top 10 applications by number of services</span>
+                            <span class="text-muted small">Services vs. progress (%)</span>
+                        </div>
+                        <canvas id="servicesChart" height="120"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card table-card">
+                    <div class="card-body">
+                        <div class="section-title mb-2">API status snapshot</div>
+                        <canvas id="apiPieChart" height="150"></canvas>
+                        <div class="mt-3 small text-muted">
+                            Shows tested, received-but-not-tested, and remaining APIs across departments.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Department / Application table -->
+    <section class="mb-5">
+        <div class="card table-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="section-title">Department-wise onboarding status</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover align-middle" id="deptTable" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>Department</th>
+                                <th>Application</th>
+                                <th>TSP</th>
+                                <th>No. of services</th>
+                                <th>APIs received</th>
+                                <th>APIs OK</th>
+                                <th>Remaining APIs</th>
+                                <th>Progress %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <!-- Filled by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Utility Payments only -->
+    <section class="mb-5">
+        <div class="row g-3">
+            <div class="col-lg-6">
+                <div class="card table-card">
+                    <div class="card-body">
+                        <div class="section-title mb-2">Utility payments covered</div>
+                        <ul class="list-group list-group-flush" id="utilityList">
+                            <!-- Filled by JS -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+// Data embedded from Excel (cleaned for NaNs)
+const deptData = [{"Department": "Social Justice Department", "Application Name": "Suneethi", "TSP": "CDIT", "No of services": 30, "No of APIs received": 2, "No of APIs tested 'OK' by DUK": 2, "Remaining APIs needed": 28, "Progress %": 6.666666666666667}, {"Department": "Land revenue", "Application Name": "eDistrict", "TSP": "NIC", "No of services": 28, "No of APIs received": 1, "No of APIs tested 'OK' by DUK": 0, "Remaining APIs needed": 28, "Progress %": 0.0}, {"Department": "Backward Class", "Application Name": "eGrantz", "TSP": "CDIT", "No of services": 15, "No of APIs received": 0, "No of APIs tested 'OK' by DUK": 0, "Remaining APIs needed": 15, "Progress %": 0.0}, {"Department": "Kerala Tourism", "Application Name": "Kerala Tourism", "TSP": "Invis", "No of services": 10, "No of APIs received": 0, "No of APIs tested 'OK' by DUK": 0, "Remaining APIs needed": 10, "Progress %": 0.0}, {"Department": "Kerala Police", "Application Name": "POLAPP", "TSP": "Inhouse", "No of services": 9, "No of APIs received": 0, "No of APIs tested 'OK' by DUK": 0, "Remaining APIs needed": 9, "Progress %": 0.0}, {"Department": "Kerala State Electricity Board", "Application Name": "KSEB", "TSP": "Inhouse", "No of services": 9, "No of APIs received": 0, "No of APIs tested 'OK' by DUK": 0, "Remaining APIs needed": 9, "Progress %": 0.0}, {"Department": "Dairy Development", "Application Name": "Ksheerasree", "TSP": "NIC", "No of services": 8, "No of APIs received": 0, "No of APIs tested 'OK' by DUK": 0, "Remaining APIs needed": 8, "Progress %": 0.0}, {"Department": "SC Dept", "Application Name": "eGrantz", "TSP": "CDIT", "No of services": 7, "No of APIs received": 0, "No of APIs tested 'OK' by DUK": 0, "Remaining APIs needed": 7, "Progress %": 0.0}, {"Department": "Civil Supplies", "Application Name": "RCMS", "TSP": "NIC", "No of services": 7, "No of APIs received": 0, "No of APIs tested 'OK' by DUK": 0, "Remaining APIs needed": 7, "Progress %": 0.0}, {"Department": "Registration Department", "Application Name": "PEARL", "TSP": "NIC", "No of services": 5, "No of APIs received": 0, "No of APIs tested 'OK' by DUK": 0, "Remaining APIs needed": 5, "Progress %": 0.0}, {"Department": "Printing and Stationery Dept", "Application Name": "COMPOSE", "TSP": "NIC", "No of services": 5, "No of APIs received": 0, "No of APIs tested 'OK' by DUK": 0, "Remaining APIs needed": 5, "Progress %": 0.0}, {"Department": "Agriculture Dept", "Application Name": "AIMS", "TSP": "NIC", "No of services": 4, "No of APIs received": 0, "No of APIs tested 'OK' by DUK": 0, "Remaining APIs needed": 4, "Progress %": 0.0}, {"Department": "General Education Department", "Application Name": "www.hseportal.kerala.gov.in", "TSP": "NIC", "No of services": 4, "No of APIs received": 0, "No of APIs tested 'OK' by DUK": 0, "Remaining APIs needed": 4, "Progress %": 0.0}, {"Department": "ST Dept", "Application Name": "eGrantz", "TSP": "CDIT", "No of services": 3, "No of APIs received": 0, "No of APIs tested 'OK' by DUK": 0, "Remaining APIs needed": 3, "Progress %": 0.0}, {"Department": "Health", "Application Name": "eHealth", "TSP": "Inhouse", "No of services": 3, "No of APIs received": 3, "No of APIs tested 'OK' by DUK": 0, "Remaining APIs needed": 3, "Progress %": 0.0}, {"Department": "Fisheries Dept", "Application Name": "FIMS", "TSP": "NIC", "No of services": 3, "No of APIs received": 0, "No of APIs tested 'OK' by DUK": 0, "Remaining APIs needed": 3, "Progress %": 0.0}, {"Department": "Kerala Public Service Commission", "Application Name": "Thulasi", "TSP": "Inhouse", "No of services": 3, "No of APIs received": 0, "No of APIs tested 'OK' by DUK": 0, "Remaining APIs needed": 3, "Progress %": 0.0}, {"Department": "National Employment Service", "Application Name": "e-Employment Exchange", "TSP": "NIC", "No of services": 3, "No of APIs received": 0, "No of APIs tested 'OK' by DUK": 0, "Remaining APIs needed": 3, "Progress %": 0.0}, {"Department": "General Education Department", "Application Name": "HSCAP", "TSP": "Inhouse", "No of services": 3, "No of APIs received": 0, "No of APIs tested 'OK' by DUK": 0, "Remaining APIs needed": 3, "Progress %": 0.0}, {"Department": "NORKA", "Application Name": "NORKA", "TSP": "CDIT", "No of services": 3, "No of APIs received": 0, "No of APIs tested 'OK' by DUK": 0, "Remaining APIs needed": 3, "Progress %": 0.0}, {"Department": "Land revenue", "Application Name": "MITHRAM and KBT", "TSP": "CDIT", "No of services": 2, "No of APIs received": 0, "No of APIs tested 'OK' by DUK": 0, "Remaining APIs needed": 2, "Progress %": 0.0}, {"Department": "KSRTC", "Application Name": "KSRTC SWIFT", "TSP": "Inhouse", "No of services": 2, "No of APIs received": 0, "No of APIs tested 'OK' by DUK": 0, "Remaining APIs needed": 2, "Progress %": 0.0}, {"Department": "Kerala State Higher Education Council", "Application Name": "HES Scolarship", "TSP": "CDIT", "No of services": 1, "No of APIs received": 0, "No of APIs tested 'OK' by DUK": 0, "Remaining APIs needed": 1, "Progress %": 0.0}, {"Department": "Collegiate Education", "Application Name": "dcescholarship.kerala.gov.in/", "TSP": "NIC", "No of services": 1, "No of APIs received": 0, "No of APIs tested 'OK' by DUK": 0, "Remaining APIs needed": 1, "Progress %": 0.0}, {"Department": "Directorate of Technical Education", "Application Name": "www.sbte.kerala.gov.in/", "TSP": "NIC", "No of services": 1, "No of APIs received": 0, "No of APIs tested 'OK' by DUK": 0, "Remaining APIs needed": 1, "Progress %": 0.0}, {"Department": "CM's Public Grievance Redressal System", "Application Name": "CMO Portal", "TSP": "CDIT", "No of services": 1, "No of APIs received": 0, "No of APIs tested 'OK' by DUK": 0, "Remaining APIs needed": 1, "Progress %": 0.0}, {"Department": "PWD ", "Application Name": "PWD Rest House booking ", "TSP": "CDIT", "No of services": 1, "No of APIs received": 0, "No of APIs tested 'OK' by DUK": 0, "Remaining APIs needed": 1, "Progress %": 0.0}];
+const utilityData = [{"Utility Payments": "KSEB"}, {"Utility Payments": "KWA"}, {"Utility Payments": "BSNL Phone bills"}, {"Utility Payments": "Cooking Gas payments"}, {"Utility Payments": "Revenue Dept Payments - ReLIS and 'Ente Bhoomi'"}, {"Utility Payments": "KFON payments"}, {"Utility Payments": "RTI Payments"}, {"Utility Payments": "Kerala University Remittances"}, {"Utility Payments": "MG University Remittances"}, {"Utility Payments": "Calicut University Remittances"}, {"Utility Payments": "Kannur University Remittances"}, {"Utility Payments": "Kochi University Remittances"}, {"Utility Payments": "Kerala Technological University Remittances"}];
+
+// Top 10 chart data
+const chartDepartments = ["Social Justice Department - Suneethi", "Land revenue - eDistrict", "Backward Class - eGrantz", "Kerala Tourism - Kerala Tourism", "Kerala Police - POLAPP", "Kerala State Electricity Board - KSEB", "Dairy Development - Ksheerasree", "SC Dept - eGrantz", "Civil Supplies - RCMS", "Registration Department - PEARL"];
+const chartServices = [30, 28, 15, 10, 9, 9, 8, 7, 7, 5];
+const chartProgress = [6.7, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+
+// Derived API counts
+const totalApisReceived = 6;
+const totalApisOK = 2;
+const totalApisRemaining = 169;
+const totalApisPendingTest = Math.max(totalApisReceived - totalApisOK, 0);
+
+document.addEventListener("DOMContentLoaded", function() {
+    // Fill department table
+    const deptBody = document.querySelector("#deptTable tbody");
+    deptData.forEach(row => {
+        const progress = Number.isFinite(row["Progress %"]) ? row["Progress %"] : 0;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${row["Department"] || ""}</td>
+            <td>${row["Application Name"] || ""}</td>
+            <td>${row["TSP"] || ""}</td>
+            <td class="text-end">${row["No of services"] ?? ""}</td>
+            <td class="text-end">${row["No of APIs received"] ?? ""}</td>
+            <td class="text-end">${row["No of APIs tested 'OK' by DUK"] ?? ""}</td>
+            <td class="text-end">${row["Remaining APIs needed"] ?? ""}</td>
+            <td class="text-end">${progress.toFixed(1)}</td>
+        `;
+        deptBody.appendChild(tr);
+    });
+
+    // DataTables initialisation
+    new DataTable('#deptTable', {
+        pageLength: 10,
+        order: [[7, 'desc']]
+    });
+
+    // Fill utility list
+    const utilList = document.querySelector("#utilityList");
+    utilityData.forEach(row => {
+        const li = document.createElement("li");
+        li.className = "list-group-item d-flex align-items-center";
+        li.innerHTML = `<span>${row["Utility Payments"] ?? ""}</span>`;
+        utilList.appendChild(li);
+    });
+
+    // Charts
+    const servicesCtx = document.getElementById('servicesChart').getContext('2d');
+    new Chart(servicesCtx, {
+        type: 'bar',
+        data: {
+            labels: chartDepartments,
+            datasets: [
+                {
+                    label: 'No. of services',
+                    data: chartServices,
+                    yAxisID: 'y',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Progress %',
+                    data: chartProgress,
+                    yAxisID: 'y1',
+                    type: 'line',
+                    tension: 0.3
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            interaction: {
+                mode: 'index',
+                intersect: false
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'No. of services' }
+                },
+                y1: {
+                    beginAtZero: true,
+                    position: 'right',
+                    title: { display: true, text: 'Progress %' }
+                },
+                x: {
+                    ticks: { autoSkip: false, maxRotation: 45, minRotation: 0 }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    const apiCtx = document.getElementById('apiPieChart').getContext('2d');
+    new Chart(apiCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['APIs tested OK', 'APIs received (pending test)', 'APIs not yet shared'],
+            datasets: [{ data: [totalApisOK, totalApisPendingTest, totalApisRemaining] }]
+        },
+        options: {
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+});
+</script>
+</body>
+</html>
